@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <cmath>
 #include <bitset>
 #include <string>
@@ -55,7 +55,7 @@ string HammingFix(string block) {
 
         if(b) errorCounter += d;
     }
-    if(HammingHasErrors(block)) errorCounter += 1;
+    if(HammingHasErrors(block) && '1' == block[0]) errorCounter += 1;
 
     if (errorCounter != 0) {
         if (block[errorCounter - 1] == '1') block[errorCounter - 1] = '0';
@@ -144,14 +144,15 @@ void task2() {
                 buffer.insert(0, "1");
             temp/=2;
         }
-        Letters3.insert({ch, buffer});
+        Letters3.insert({ch, buffer + buffer});
         counter++;
     }
 
-    for(auto& [ch, st] : Letters3) {
+    for(auto& [ch, st] : Letters3)
         Letters3[ch] = HammingCreate(st);
+    
+    for(auto& [ch, st] : Letters3) 
         cout << ch << " " << Letters3[ch] << "; ";
-    }
     cout << endl;
 
     Letters3['a'].replace(1, 1, "1");
