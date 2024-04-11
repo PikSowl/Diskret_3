@@ -10,6 +10,8 @@ using std::endl;
 using std::string;
 using std::bitset;
 using std::map;
+using std::byte;
+using std::pair;
 
 string SwapBit(string block, int poz){
     if ('0' == block[poz]) block[poz] = '1';
@@ -68,6 +70,23 @@ string HammingFix(string block) {
     return block;
 }
 
+string IntToByte(int num, int byteNum = 1){
+    string line;
+    for(long long i = 1; i < pow (256, byteNum); i*=2){
+        if (bool((num / i) % 2)) line.insert(0,"1");
+        else line.insert(0,"0");
+    }
+    return line;
+}
+
+string StringToByte(const string& line){
+    string byteLine;
+    for(char c : line)
+        byteLine.append(IntToByte(int(c)));
+
+    return byteLine;
+}
+
 
 void task1() {
     string word = "computer";
@@ -98,7 +117,7 @@ void task1() {
 }
 
 void task2() {
-    map<char, string> Letters2{};
+    map<char, string> Letters2;
     string abcd = "abcdefgh";
 
     int startingSize = int(log2 (double(abcd.size())));
@@ -169,12 +188,107 @@ void task2() {
     }
 }
 
-int main(){
-    int i;
-    cout << "Task number: ";
-    cin >> i;
+void task3(){
+    string line;
+    cout << "Enter line:";
+    cin >> line;
+
+    //addddghtyyyyyyyyyiklopppppppppppp
+    string rLine;
+
+    for(int i = 0; i < line.size(); i++){
+        if (line[i] == line[i+1]) {
+            int pos = i;
+            for (;(line[i] == line[i+1]) && (line.size() > i + 1); i++) { }
+            rLine.push_back(char(i - pos + 1));
+            rLine.push_back(line[i]);
+        }
+        else {
+            int pos = i;
+            for (;(line[i] != line[i+1]) && (line.size() > i + 1); i++) { }
+            if (line.size() != i + 1) i--;
+            rLine.push_back(char(0));
+            rLine.push_back(char(i - pos + 1));
+            for (int j = pos; i >= j; j++) rLine.push_back(line[j]);
+
+        }
+    }
+
     cout << endl;
-    switch (i) {
+    for(char c : rLine)
+        cout << int(c) << ' ';
+
+    cout << endl << endl;
+
+    string bLine = StringToByte(rLine);
+    for(int i = 0; i < bLine.size(); i++){
+        cout << bLine[i];
+        if (0 == (i + 1) % 8) cout << ' ';
+    }
+}
+
+void task5() {
+    string line;
+    cout << "Enter line:";
+    cin >> line;
+
+    map<char, float> probability = {{'a', 0.1},
+                                    {'b', 0.15},
+                                    {'c', 0.05},
+                                    {'d', 0.5},
+                                    {'e', 0.1},
+                                    {'f', 0.1}};
+
+    map<char,pair<float, float>> lineDistance;
+
+    float temp = 0;
+    while (!probability.empty()){
+        float max = 0;
+        char curent;
+        for (auto& [c,  f] : probability){
+            if (max < f) {
+                max = f;
+                curent = c;
+            }
+        }
+        lineDistance[curent] = pair<float, float>(temp, temp + max);
+        temp += max;
+        probability.erase(curent);
+    }
+    for (auto& [c,  f] : lineDistance){
+        cout << c << ':' << get<0>(f) << "," <<  get<1>(f) << " ";
+    }
+    long double  leftB = 0, rightB = 1, dist;
+    cout << endl;
+    for (char ch : line){
+        dist = rightB-leftB;
+        rightB = leftB + (dist)*get<1>(lineDistance[ch]);
+        leftB = leftB + (dist)*get<0>(lineDistance[ch]);
+    }
+    cout << leftB << ' ' << rightB << endl;
+    int answer;
+    for(int i = 1;i > 0; i++){
+        if(1 <= (rightB-leftB)*pow(10,i)){
+            answer =  int(leftB*pow(10,i)+2);
+            i = -9;
+        }
+    }
+    cout << answer << endl;
+    string byteAnswer = IntToByte(answer, 3);
+
+    for(int i = 0; i < byteAnswer.size(); i++){
+        cout << byteAnswer[i];
+        if (0 == (i + 1) % 8) cout << ' ';
+    }
+
+}
+
+int main(){
+    int t;
+    cout << "Task number: ";
+    cin >> t;
+    cout << endl;
+    switch (t) {
         case 1 :{
             task1();
             break;
@@ -183,10 +297,14 @@ int main(){
             task2();
             break;
         }
-        /*case 6:{
-            task6();
+        case 3:{
+            task3();
             break;
-        }*/
+        }
+        case 5:{
+            task5();
+            break;
+        }
         default:{
             cout << "wrong number" << endl;
             break;
