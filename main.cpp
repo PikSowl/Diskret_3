@@ -11,13 +11,19 @@ using std::string;
 using std::bitset;
 using std::map;
 
+string SwapBit(string block, int poz){
+    if ('0' == block[poz]) block[poz] = '1';
+    else block[poz] = '0';
+    return block;
+}
+
 string HammingCreate(string block) {
 
     for (int d = 1; d <= block.size(); d *= 2) {
         block.insert(d - 1, "0");
     }
 
-    for (int d = 2; d <= block.size(); d *= 2) {
+    for (int d = 1; d <= block.size(); d *= 2) {
         bool b = false;
         for(int i = d - 1; i < block.size(); i += 2*d)
             for(int j = i; (j < i + d)&&(j < block.size()); j++)
@@ -27,40 +33,38 @@ string HammingCreate(string block) {
         else block[d - 1] = '0';
     }
 
-    bool b = false;
+    /*bool b = false;
     for(char j : block)
         if (j=='1') b =! b;
 
     if (b) block[0] = '1';
     else block[0] = '0';
-
+*/
     return block;
 }
 
-bool HammingHasErrors(string block) {
-    bool b = false;
-    for (int i = 0; i <= block.size(); i++)
-        if (block[i] == '1') b=!b;
-
-    return b;
-}
-
-string HammingFix(string block) {
-    int errorCounter = 0;
-    for (int d = 2; d <= block.size(); d *= 2) {
+int FindErrors(string block){
+    int errorCount = -1;
+    for (int d = 1; d <= block.size(); d *= 2) {
         bool b = false;
         for(int i = d - 1; i < block.size(); i += 2*d)
             for(int j = i; (j < i + d)&&(j < block.size()); j++)
                 if (block[j]=='1') b =! b;
 
-        if(b) errorCounter += d;
+        if (b) errorCount += d;
     }
-    if(HammingHasErrors(block)) errorCounter += 1;
+    return errorCount;
+}
 
-    if (errorCounter != 0) {
-        if (block[errorCounter - 1] == '1') block[errorCounter - 1] = '0';
-        else block[errorCounter - 1] = '1';
-    }
+bool HammingHasErrors(string block) {
+    int errorCount = FindErrors(block);
+    return (-1 != errorCount);
+}
+
+string HammingFix(string block) {
+    int errorCount = FindErrors(block);
+    if (-1 != errorCount)
+        block = SwapBit(block, errorCount);
     return block;
 }
 
@@ -82,10 +86,8 @@ void task1() {
 
     cout << block1 << " " << block2 << endl;
 
-    if(block1[2]=='1') block1[2] = '0';
-    else block1[2] = '1';
-    if(block2[24]=='1') block2[24] = '0';
-    else block2[24] = '1';
+    block1 = SwapBit(block1, 2);
+    block2 = SwapBit(block2, 24);
 
     cout << block1 << " " << block2 << endl;
 
@@ -121,8 +123,8 @@ void task2() {
     }
     cout << endl;
 
-    Letters2['b'].replace(3, 1, "0");
-    Letters2['d'].replace(2, 1, "1");
+    Letters2['b'] = SwapBit(Letters2['b'], 3);
+    Letters2['d'] = SwapBit(Letters2['d'], 2);
 
     for(auto& [ch, st] : Letters2)
         cout << ch << " " << Letters2[ch] << "; ";
@@ -154,8 +156,8 @@ void task2() {
     }
     cout << endl;
 
-    Letters3['a'].replace(1, 1, "1");
-    Letters3['d'].replace(2, 1, "1");
+    Letters3['b'] = SwapBit(Letters3['b'], 3);
+    Letters3['d'] = SwapBit(Letters3['d'], 2);
 
     for(auto& [ch, st] : Letters3)
         cout << ch << " " << Letters3[ch] << "; ";
